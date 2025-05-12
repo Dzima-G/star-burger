@@ -126,20 +126,24 @@ class RestaurantMenuItem(models.Model):
 
 class Order(models.Model):
     firstname = models.CharField(
-                max_length=50,
-                verbose_name='Имя'
+        max_length=50,
+        verbose_name='Имя',
+        null=False
     )
     lastname = models.CharField(
-                max_length=50,
-                verbose_name='Фамилия'
+        max_length=50,
+        verbose_name='Фамилия',
+        null=False
     )
     phone_number = PhoneNumberField(
         region='RU',
-        verbose_name='Мобильный телефон'
+        verbose_name='Мобильный телефон',
+        db_index=True
     )
     delivery_address = models.CharField(
-            max_length=300,
-            verbose_name='Адрес доставки'
+        max_length=300,
+        verbose_name='Адрес доставки',
+        null=False
     )
 
     class Meta:
@@ -151,9 +155,21 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, verbose_name = 'Заказ', related_name='items')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name = 'Товар')
-    quantity = models.PositiveIntegerField(verbose_name='Количество')
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        verbose_name='Заказ',
+        related_name='items'
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        verbose_name='Товар'
+    )
+    quantity = models.PositiveIntegerField(
+        verbose_name='Количество',
+        null=False
+    )
 
     class Meta:
         verbose_name = 'Заказанные товары'
