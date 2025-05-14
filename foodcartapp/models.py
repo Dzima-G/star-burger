@@ -135,7 +135,7 @@ class Order(models.Model):
         verbose_name='Фамилия',
         null=False
     )
-    phone_number = PhoneNumberField(
+    phonenumber = PhoneNumberField(
         region='RU',
         verbose_name='Мобильный телефон',
         db_index=True

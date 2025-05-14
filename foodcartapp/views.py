@@ -1,11 +1,25 @@
 from django.http import JsonResponse
 from django.templatetags.static import static
-from phonenumbers import NumberParseException, is_valid_number, parse
-from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.serializers import CharField, ModelSerializer
 
 from .models import Order, OrderItem, Product
+
+
+class OrderItemSerializer(ModelSerializer):
+    class Meta:
+        model = OrderItem
+        fields = ['product', 'quantity']
+
+
+class OrderSerializer(ModelSerializer):
+    address = CharField(source='delivery_address')
+    products = OrderItemSerializer(many=True, allow_empty=False)
+
+    class Meta:
+        model = Order
+        fields = ['firstname', 'lastname', 'phonenumber', 'address', 'products']
 
 
 def banners_list_api(request):
@@ -62,89 +76,19 @@ def product_list_api(request):
 
 @api_view(['POST'])
 def register_order(request):
-    try:
-        data = request.data
+    serializer = OrderSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
 
-        required_fields = ['firstname', 'lastname', 'phonenumber', 'address', 'products']
+    order = Order.objects.create(
+        firstname=serializer.validated_data['firstname'],
+        lastname=serializer.validated_data['lastname'],
+        phonenumber=serializer.validated_data['phonenumber'],
+        delivery_address=serializer.validated_data['delivery_address'],
+    )
 
-        missing_keys = [field for field in required_fields if field not in data]
-        if missing_keys:
-            return Response(
-                {'error': f'Missing required fields: {missing_keys}.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+    products_fields = serializer.validated_data['products']
+    order_items = [OrderItem(order=order, **fields) for fields in products_fields]
 
-        empty_fields = [field for field in required_fields if not data.get(field)]
-        if empty_fields:
-            return Response(
-                {'error': f'Fields cannot be empty: {empty_fields}.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+    OrderItem.objects.bulk_create(order_items)
 
-        phone_number = data.get('phonenumber')
-        products_data = data.get('products')
-
-        try:
-            phone_number_obj = parse(phone_number, 'RU')
-        except NumberParseException:
-            return Response(
-                {'error': f'Incorrect phone number {phone_number}.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        if not is_valid_number(phone_number_obj):
-            return Response(
-                {'error': f'Incorrect phone number entered: {phone_number}.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        if not isinstance(products_data, list):
-            return Response(
-                {'error': f'Expected a list of values but got {type(products_data)}.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        for product_data in products_data:
-            product_id = product_data.get('product')
-            quantity = product_data.get('quantity')
-
-            if not product_id or not quantity:
-                return Response(
-                    {'error': f'No data available'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            try:
-                product_id = int(product_id)
-                quantity = int(quantity)
-            except ValueError:
-                return Response(
-                    {'error': f'Invalid data type {product_id} or {quantity}'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            if not Product.objects.filter(id=product_id).exists():
-                return Response(
-                    {'error': f'Non-existent product identifier {product_id}.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-        order = Order.objects.create(
-            firstname=data.get('firstname'),
-            lastname=data.get('lastname'),
-            phone_number=parse(data.get('phonenumber'), 'RU'),
-            delivery_address=data.get('address')
-        )
-
-        for product_data in data.get('products'):
-            product_id = int(product_data['product'])
-            quantity = int(product_data['quantity'])
-            product = Product.objects.get(id=product_id)
-            OrderItem.objects.create(order=order, product=product, quantity=quantity)
-
-    except Exception as e:
-        return Response(
-            {'error': f'Data processing error: {str(e)}'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
     return Response({})
