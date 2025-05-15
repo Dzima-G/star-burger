@@ -15,11 +15,19 @@ class OrderItemSerializer(ModelSerializer):
 
 class OrderSerializer(ModelSerializer):
     address = CharField(source='delivery_address')
-    products = OrderItemSerializer(many=True, allow_empty=False)
+    products = OrderItemSerializer(many=True, allow_empty=False, write_only=True)
 
     class Meta:
         model = Order
         fields = ['firstname', 'lastname', 'phonenumber', 'address', 'products']
+
+
+class SendOrder(ModelSerializer):
+    address = CharField(source='delivery_address')
+
+    class Meta:
+        model = Order
+        fields = ['id', 'firstname', 'lastname', 'phonenumber', 'address']
 
 
 def banners_list_api(request):
@@ -91,4 +99,6 @@ def register_order(request):
 
     OrderItem.objects.bulk_create(order_items)
 
-    return Response({})
+    order_serializer = SendOrder(order)
+
+    return Response(order_serializer.data)
