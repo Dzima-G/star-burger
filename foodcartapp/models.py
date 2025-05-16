@@ -1,7 +1,7 @@
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import DecimalField, F, Sum
 from phonenumber_field.modelfields import PhoneNumberField
-from django.db.models import Sum, F, FloatField
 
 
 class Restaurant(models.Model):
@@ -129,7 +129,8 @@ class OrdersQuerySet(models.QuerySet):
     def with_total_price(self):
         return self.annotate(
             total_price=Sum(
-                F('items__product__price') * F('items__quantity')
+                F('items__price') * F('items__quantity'),
+                output_field=DecimalField()
             )
         )
 
@@ -181,6 +182,13 @@ class OrderItem(models.Model):
     quantity = models.PositiveIntegerField(
         verbose_name='Количество',
         null=False
+    )
+    price = models.DecimalField(
+        'Цена',
+        max_digits=8,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        blank=True
     )
 
     class Meta:

@@ -131,8 +131,16 @@ class OrderAdmin(admin.ModelAdmin):
         'delivery_address',
         'firstname',
         'lastname',
-        'phone_number',
+        'phonenumber',
     ]
+
+    def save_formset(self, request, form, formset, change):
+        instances = formset.save(commit=False)
+        for instance in instances:
+            if not instance.price:
+                instance.price = instance.product.price
+            instance.save()
+        formset.save_m2m()
 
 
 @admin.register(OrderItem)
