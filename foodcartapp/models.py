@@ -167,8 +167,12 @@ class Order(models.Model):
         max_length=20,
         choices=STATUS_CHOICES,
         default='unprocessed',
-        verbose_name='Статус заказа',
+
         db_index=True
+    )
+    comment = models.TextField(
+        verbose_name='Коментарий',
+        blank=True
     )
 
     objects = OrdersQuerySet.as_manager()

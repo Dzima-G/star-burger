@@ -135,6 +135,7 @@ class OrderAdmin(admin.ModelAdmin):
         'firstname',
         'lastname',
         'phonenumber',
+        'comment',
     ]
 
     def save_formset(self, request, form, formset, change):
