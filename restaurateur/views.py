@@ -6,7 +6,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views import View
 
-from foodcartapp.models import Product, Restaurant, Order
+from foodcartapp.models import Order, Product, Restaurant
 
 
 class Login(forms.Form):
