@@ -136,6 +136,13 @@ class OrdersQuerySet(models.QuerySet):
 
 
 class Order(models.Model):
+    STATUS_CHOICES = [
+        ('unprocessed', 'Необработанный'),
+        ('underway', 'В работе'),
+        ('delivery', 'Доставка'),
+        ('completed', 'Завершен'),
+    ]
+
     firstname = models.CharField(
         max_length=50,
         verbose_name='Имя',
@@ -155,6 +162,13 @@ class Order(models.Model):
         max_length=300,
         verbose_name='Адрес доставки',
         null=False
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='unprocessed',
+        verbose_name='Статус заказа',
+        db_index=True
     )
 
     objects = OrdersQuerySet.as_manager()
