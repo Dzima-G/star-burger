@@ -7,6 +7,7 @@ from django.urls import reverse_lazy
 from django.views import View
 
 from foodcartapp.models import Order, Product, Restaurant
+from foodcartapp.services import get_restaurants_for_order
 
 
 class Login(forms.Form):
@@ -90,8 +91,17 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    orders = Order.objects.with_total_price().exclude(status__in=['completed'])
-    return render(request, template_name='order_items.html', context={
-        'order_items': orders
-        # TODO заглушка для нереализованного функционала
+    qs = Order.objects.with_total_price().exclude(status='completed')
+    orders = list(qs)
+    priority = {
+        'unprocessed': 1,
+        'underway': 2,
+        'delivery': 3,
+    }
+    orders.sort(key=lambda o: priority.get(o.status, 5))
+    for order in orders:
+        order.available_restaurants = get_restaurants_for_order(order)
+
+    return render(request, 'order_items.html', {
+        'order_items': orders,
     })

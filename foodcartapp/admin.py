@@ -5,6 +5,8 @@ from django.templatetags.static import static
 from django.utils.html import format_html
 from django.utils.http import url_has_allowed_host_and_scheme
 
+from foodcartapp.services import get_restaurants_for_order
+
 from .models import (Order, OrderItem, Product, ProductCategory, Restaurant,
                      RestaurantMenuItem)
 
@@ -132,6 +134,7 @@ class OrderAdmin(admin.ModelAdmin):
     fields = [
         'status',
         'payment',
+        'restaurant',
         'delivery_address',
         'firstname',
         'lastname',
@@ -157,6 +160,22 @@ class OrderAdmin(admin.ModelAdmin):
                 return HttpResponseRedirect(next_url)
         return super().response_post_save_change(request, obj)
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name != 'restaurant':
+            return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+        order_id = request.resolver_match.kwargs.get('object_id')
+
+        if order_id:
+            try:
+                order = Order.objects.get(pk=order_id)
+                kwargs['queryset'] = get_restaurants_for_order(order)
+            except Order.DoesNotExist:
+                kwargs['queryset'] = Restaurant.objects.none()
+        else:
+            kwargs['queryset'] = Restaurant.objects.all()
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):

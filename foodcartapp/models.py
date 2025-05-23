@@ -203,6 +203,14 @@ class Order(models.Model):
         db_index=True,
         verbose_name='Способ оплаты'
     )
+    restaurant = models.ForeignKey(
+        Restaurant,
+        on_delete=models.CASCADE,
+        verbose_name='Ресторан',
+        related_name='order',
+        null=True,
+        blank=True
+    )
 
     objects = OrdersQuerySet.as_manager()
 
@@ -243,4 +251,4 @@ class OrderItem(models.Model):
         verbose_name_plural = 'Заказанные товары'
 
     def __str__(self):
-        return f"{self.quantity} x {self.product.name}"
+        return f'{self.quantity} x {self.product.name}'
