@@ -135,6 +135,9 @@ class OrderAdmin(admin.ModelAdmin):
         'firstname',
         'lastname',
         'phonenumber',
+        'registered_at',
+        'called_at',
+        'delivered_at',
         'comment',
     ]
 
