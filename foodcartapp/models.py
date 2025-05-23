@@ -1,8 +1,8 @@
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import DecimalField, F, Sum
-from phonenumber_field.modelfields import PhoneNumberField
 from django.utils import timezone
+from phonenumber_field.modelfields import PhoneNumberField
 
 
 class Restaurant(models.Model):
@@ -143,6 +143,10 @@ class Order(models.Model):
         ('delivery', 'Доставка'),
         ('completed', 'Завершен'),
     ]
+    PAYMENT_CHOICES = [
+        ('cash', 'Наличный'),
+        ('non_cash', 'Безналичный')
+    ]
 
     firstname = models.CharField(
         max_length=50,
@@ -168,7 +172,8 @@ class Order(models.Model):
         max_length=20,
         choices=STATUS_CHOICES,
         default='unprocessed',
-        db_index=True
+        db_index=True,
+        verbose_name='Статус'
     )
     comment = models.TextField(
         verbose_name='Коментарий',
@@ -190,6 +195,13 @@ class Order(models.Model):
         blank=True,
         verbose_name='Доставлен',
         db_index=True
+    )
+    payment = models.CharField(
+        max_length=20,
+        choices=PAYMENT_CHOICES,
+        default='cash',
+        db_index=True,
+        verbose_name='Способ оплаты'
     )
 
     objects = OrdersQuerySet.as_manager()
