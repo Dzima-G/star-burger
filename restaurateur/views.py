@@ -1,4 +1,5 @@
 from django import forms
+from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import user_passes_test
@@ -7,7 +8,9 @@ from django.urls import reverse_lazy
 from django.views import View
 
 from foodcartapp.models import Order, Product, Restaurant
-from foodcartapp.services import get_restaurants_for_order
+from foodcartapp.services import (get_delivery_distance,
+                                  get_restaurants_for_order,
+                                  fetch_coordinates)
 
 
 class Login(forms.Form):
@@ -100,7 +103,29 @@ def view_orders(request):
     }
     orders.sort(key=lambda o: priority.get(o.status, 5))
     for order in orders:
-        order.available_restaurants = get_restaurants_for_order(order)
+        order.coords_error = False
+
+        restaurants = get_restaurants_for_order(order)
+        delivery_coords = fetch_coordinates(settings.YANDEX_API_KEY, order.delivery_address)
+
+        if not delivery_coords:
+            order.coords_error = True
+            order.available_restaurants = []
+            continue
+
+        for rest in restaurants:
+            restaurant_coords = fetch_coordinates(settings.YANDEX_API_KEY, rest.address)
+
+            if not restaurant_coords:
+                order.coords_error = True
+                break
+
+            rest.distance = get_delivery_distance(delivery_coords, restaurant_coords)
+
+        if order.coords_error:
+            order.available_restaurants = []
+        else:
+            order.available_restaurants = restaurants
 
     return render(request, 'order_items.html', {
         'order_items': orders,
