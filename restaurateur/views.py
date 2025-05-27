@@ -9,8 +9,8 @@ from django.views import View
 
 from foodcartapp.models import Order, Product, Restaurant
 from foodcartapp.services import (get_delivery_distance,
-                                  get_restaurants_for_order,
-                                  fetch_coordinates)
+                                  get_restaurants_for_order)
+from places.models import Place
 
 
 class Login(forms.Form):
@@ -102,21 +102,30 @@ def view_orders(request):
         'delivery': 3,
     }
     orders.sort(key=lambda o: priority.get(o.status, 5))
+
     for order in orders:
         order.coords_error = False
 
         restaurants = get_restaurants_for_order(order)
-        delivery_coords = fetch_coordinates(settings.YANDEX_API_KEY, order.delivery_address)
 
-        if not delivery_coords:
+        order_place = Place.objects.filter(address=order.delivery_address).first()
+
+        if not order_place or order_place.lat is None or order_place.lng is None:
+            order.coords_error = True
+            order.available_restaurants = []
+            continue
+        delivery_coords = (order_place.lng, order_place.lat)
+
+        if delivery_coords[0] is None or delivery_coords[1] is None:
             order.coords_error = True
             order.available_restaurants = []
             continue
 
         for rest in restaurants:
-            restaurant_coords = fetch_coordinates(settings.YANDEX_API_KEY, rest.address)
-
-            if not restaurant_coords:
+            restaurant_place = Place.objects.filter(address=rest.address).first()
+            if restaurant_place:
+                restaurant_coords = (restaurant_place.lng, restaurant_place.lat)
+            else:
                 order.coords_error = True
                 break
 
