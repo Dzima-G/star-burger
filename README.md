@@ -129,7 +129,7 @@ npm --version
 Перейдите в каталог проекта и установите пакеты Node.js:
 
 ```sh
-cd star-burger
+cd star_burger
 npm ci --dev
 ```
 
