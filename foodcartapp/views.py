@@ -3,24 +3,9 @@ from django.http import JsonResponse
 from django.templatetags.static import static
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework.serializers import CharField, ModelSerializer
 
-from .models import Order, OrderItem, Product
-
-
-class OrderItemSerializer(ModelSerializer):
-    class Meta:
-        model = OrderItem
-        fields = ['product', 'quantity']
-
-
-class OrderSerializer(ModelSerializer):
-    address = CharField(source='delivery_address')
-    products = OrderItemSerializer(many=True, allow_empty=False, write_only=True)
-
-    class Meta:
-        model = Order
-        fields = ['id', 'firstname', 'lastname', 'phonenumber', 'address', 'products']
+from .models import Product
+from .serializers import OrderSerializer
 
 
 def banners_list_api(request):
@@ -81,28 +66,8 @@ def register_order(request):
     serializer = OrderSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
-    order = Order.objects.create(
-        firstname=serializer.validated_data['firstname'],
-        lastname=serializer.validated_data['lastname'],
-        phonenumber=serializer.validated_data['phonenumber'],
-        delivery_address=serializer.validated_data['delivery_address'],
-    )
-
-    products_fields = serializer.validated_data['products']
-    order_items = []
-    for fields in products_fields:
-        product = fields['product']
-        quantity = fields['quantity']
-        order_items.append(
-            OrderItem(
-                order=order,
-                product=product,
-                quantity=quantity,
-                price=product.price
-            )
-        )
-
-    OrderItem.objects.bulk_create(order_items)
+    order = serializer.save()
 
     order_serializer = OrderSerializer(order)
+
     return Response(order_serializer.data)
