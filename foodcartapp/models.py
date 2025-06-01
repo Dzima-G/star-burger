@@ -150,13 +150,11 @@ class Order(models.Model):
 
     firstname = models.CharField(
         max_length=50,
-        verbose_name='Имя',
-        null=False
+        verbose_name='Имя'
     )
     lastname = models.CharField(
         max_length=50,
-        verbose_name='Фамилия',
-        null=False
+        verbose_name='Фамилия'
     )
     phonenumber = PhoneNumberField(
         region='RU',
@@ -165,8 +163,7 @@ class Order(models.Model):
     )
     delivery_address = models.CharField(
         max_length=300,
-        verbose_name='Адрес доставки',
-        null=False
+        verbose_name='Адрес доставки'
     )
     status = models.CharField(
         max_length=20,
@@ -180,7 +177,7 @@ class Order(models.Model):
         blank=True
     )
     registered_at = models.DateTimeField(
-        default=timezone.now,
+        auto_now_add=True,
         verbose_name='Зарегистрирован',
         db_index=True
     )
@@ -236,7 +233,7 @@ class OrderItem(models.Model):
     )
     quantity = models.PositiveIntegerField(
         verbose_name='Количество',
-        null=False
+        validators = [MinValueValidator(1)],
     )
     price = models.DecimalField(
         'Цена',
