@@ -65,32 +65,39 @@ python -m venv venv
 ```sh
 pip install -r requirements.txt
 ```
-
 ### Переменные окружения
+Настроить бэкенд: создать файл `.env` в каталоге `star_burger/` со следующими настройками:
 
-Часть настроек проекта берётся из переменных окружения. Создать файл `.env` в каталоге `star_burger/` и запишите туда
-данные в таком формате: `ПЕРЕМЕННАЯ=значение`.
+- `DEBUG` — дебаг-режим. Поставьте `False`.
+- `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на
+  вашем сайте.
+- `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
+- `DB_NAME` — имя базы данных PostgreSQL (например: `DB_NAME=star-burger_db`).
+- `DB_USER` — пользователь PostgreSQL (например: `DB_USER=admin`).
+- `DB_PASSWORD` — пароль пользователя PostgreSQL (например: `DB_PASSWORD=9369992_admin`).
+- `DB_HOST` — адрес хоста PostgreSQL. По умолчанию `localhost`, если база данных работает на том же сервере, что и приложение Django. Если используется сторонний сервер - укажите IP или доменное имя.
+- `DB_PORT` — порт подключения к PostgreSQL. По умолчанию — `5432`.
+- `ROLLBAR_ACCESS_TOKEN` - токен Rollbar (логирование организовано с помощью Rollbar) см. https://rollbar.com
+- `DJANGO_ENV` - настройка профиля Rollbar, не обязательная переменная (профиль по умолчанию 'development'). Для указания профиля добавьте переменную окружения например: `DJANGO_ENV=production`.
+- `YANDEX_API_KEY` - ключ Yandex geocoder, API. Пример: `YANDEX_API_KEY=d1000000f-3ce6-4344-bfe0-00vv21698888` (см. https://developer.tech.yandex.ru/services)
 
-**Для запуска проекта необходима обязательная настройка**.
+Создайте файл базы данных с помощью Postgres и отмигрируйте:
 
-Определите переменную окружения `SECRET_KEY`. Добавить в файл `.env` в каталоге `star_burger/` запись с таким кодом:
+[Установите PostgreSQL](https://www.enterprisedb.com/docs/supported-open-source/postgresql/installing/), если этого ещё не сделали.
 
-```sh
-SECRET_KEY=django-insecure-0if40nf4nf93n4
-```
+[Создайте базу данных PostgreSQL](https://www.digitalocean.com/community/tutorials/how-to-use-postgresql-with-your-django-application-on-ubuntu-14-04), если этого ещё не сделали.
 
-Определите переменную окружения `YANDEX_API_KEY`. Добавить в файл `.env` в каталоге `star_burger/` ключ Yandex geocoder
-API (см. https://developer.tech.yandex.ru/services) пример:
-
-```sh
-YANDEX_API_KEY=d1000000f-3ce6-4344-bfe0-00vv21698888
-```
-
-Создайте файл базы данных SQLite и отмигрируйте её следующей командой:
-
+Выполните миграцию к базе данных:
 ```sh
 python manage.py migrate
 ```
+
+Создать административную учетную запись:
+
+```sh
+python manage.py createsuperuser
+```
+
 
 Запустите сервер:
 
@@ -184,16 +191,6 @@ Parcel будет следить за файлами в каталоге `bundle
 ```sh
 ./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
 ```
-
-Настроить бэкенд: создать файл `.env` в каталоге `star_burger/` со следующими настройками:
-
-- `DEBUG` — дебаг-режим. Поставьте `False`.
-- `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на
-  вашем сайте.
-- `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
-- `ROLLBAR_ACCESS_TOKEN` - токен Rollbar (логирование организовано с помощью Rollbar) см. https://rollbar.com
-- `DJANGO_ENV` - настройка профиля Rollbar, не обязательная переменная (профиль по умолчанию 'development'). Для указания профиля добавьте переменную окружения например: `DJANGO_ENV=production`.
-
 
 ## Цели проекта
 

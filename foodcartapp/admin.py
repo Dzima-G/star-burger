@@ -130,6 +130,7 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [
         OrderItemMenuItemInline
     ]
+    readonly_fields = ['registered_at']
 
     fields = [
         'status',
@@ -176,6 +177,7 @@ class OrderAdmin(admin.ModelAdmin):
             kwargs['queryset'] = Restaurant.objects.all()
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
