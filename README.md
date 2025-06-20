@@ -192,6 +192,13 @@ Parcel будет следить за файлами в каталоге `bundle
 ./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
 ```
 
+## Быстрое обновление кода на сервере (prod-версии сайта)
+Используйте Bash скрипт деплоя:
+
+```sh
+./deploy
+```
+
 ## Цели проекта
 
 Код написан в учебных целях — это урок в курсе по Python и веб-разработке на сайте [Devman](https://dvmn.org). За основу

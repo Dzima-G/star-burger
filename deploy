@@ -1,0 +1,37 @@
+#!/bin/bash
+set -e
+
+echo "Проверяем наличия изменений на сервере."
+
+if [[ -n $(git status --porcelain) ]]; then
+	echo "Есть незакоммиченные изменения, сохраняю во временный stash."
+	git stash
+fi
+
+echo "Обновляем проект из GitHub."
+
+git pull origin master
+
+echo "Обновление завершено!"
+
+echo "Устанавливаем библиотеки для Python."
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+
+echo "Устанавливаем библиотеки для Node.js"
+npm install --silent
+
+echo "Пересоберем js код."
+./node_modules/.bin/parcel watch bundles-src/index.js --dist-dir bundles --public-url="./"
+
+echo "Собираем статику."
+python3 manage.py collectstatic --noinput
+
+echo "Запускаем миграцию."
+python3 manage.py migrate --noinput
+
+echo "Перезапускаем сервисы."
+sudo systemctl restart star-burger.service
+
+echo "Деплой завершен успешно!"
