@@ -1,0 +1,50 @@
+#!/bin/bash
+set -e
+
+echo "Проверяем наличия изменений на сервере."
+
+if [[ -n $(git status --porcelain) ]]; then
+	echo "Есть незакоммиченные изменения, сохраняю во временный stash."
+	git stash
+fi
+
+echo "Обновляем проект из GitHub."
+
+git pull origin master
+
+echo "Обновление завершено!"
+
+echo "Устанавливаем библиотеки для Python."
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt -q
+
+echo "Устанавливаем библиотеки для Node.js"
+npm install --silent
+
+echo "Пересоберем js код."
+./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./" --no-cache
+
+echo "Собираем статику."
+python3 manage.py collectstatic --noinput
+
+echo "Запускаем миграцию."
+python3 manage.py migrate --noinput
+
+echo "Перезапускаем сервисы."
+sudo systemctl restart star-burger.service
+
+echo "Предупреждаем Rollbar о деплое."
+export $(grep -v '^#' /opt/star-burger/star_burger/.env | xargs)
+
+REVISION=$(git rev-parse HEAD)
+USERNAME=$(whoami)
+
+curl -H "X-Rollbar-Access-Token: $ROLLBAR_DEPLOY_TOKEN" \
+-X POST 'https://api.rollbar.com/api/1/deploy' \
+-d environment=$DJANGO_ENV \
+-d revision=$REVISION \
+-d local_username=$USERNAME
+
+
+echo "Деплой завершен успешно!"

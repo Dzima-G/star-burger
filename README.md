@@ -71,15 +71,23 @@ pip install -r requirements.txt
 - `DEBUG` — дебаг-режим. Поставьте `False`.
 - `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на
   вашем сайте.
-- `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
-- `DB_NAME` — имя базы данных PostgreSQL (например: `DB_NAME=star-burger_db`).
-- `DB_USER` — пользователь PostgreSQL (например: `DB_USER=admin`).
-- `DB_PASSWORD` — пароль пользователя PostgreSQL (например: `DB_PASSWORD=9369992_admin`).
-- `DB_HOST` — адрес хоста PostgreSQL. По умолчанию `localhost`, если база данных работает на том же сервере, что и приложение Django. Если используется сторонний сервер - укажите IP или доменное имя.
-- `DB_PORT` — порт подключения к PostgreSQL. По умолчанию — `5432`.
-- `ROLLBAR_ACCESS_TOKEN` - токен Rollbar (логирование организовано с помощью Rollbar) см. https://rollbar.com
+- `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts).
+- `DB_URL` - данные подключения к базе данных PostgreSQL формат:
+
+   `postgresql://USER:PASSWORD@HOST:PORT/NAME` где:
+
+    - `USER` - пользователь PostgreSQL (например: `admin`);
+    - `PASSWORD` - пароль пользователя PostgreSQL (например: `9369992_admin`);
+    - `HOST` - адрес хоста PostgreSQL. По умолчанию `localhost`, если база данных работает на том же сервере, что и приложение Django. Если используется сторонний сервер - укажите IP или доменное имя;
+    - `PORT` - порт подключения к PostgreSQL. По умолчанию — `5432`;
+    - `NAME` — имя базы данных PostgreSQL (например: `star-burger_db`).
 - `DJANGO_ENV` - настройка профиля Rollbar, не обязательная переменная (профиль по умолчанию 'development'). Для указания профиля добавьте переменную окружения например: `DJANGO_ENV=production`.
-- `YANDEX_API_KEY` - ключ Yandex geocoder, API. Пример: `YANDEX_API_KEY=d1000000f-3ce6-4344-bfe0-00vv21698888` (см. https://developer.tech.yandex.ru/services)
+- `YANDEX_API_KEY` - ключ Yandex geocoder, API. Пример: `YANDEX_API_KEY=d1000000f-3ce6-4344-bfe0-00vv21698888` (см. https://developer.tech.yandex.ru/services).
+
+Не обязательные переменные окружения:
+- `ROLLBAR_ACCESS_TOKEN` - токен Rollbar (логирование организовано с помощью Rollbar) см. https://rollbar.com.
+- `ROLLBAR_DEPLOY_TOKEN` - токен для записи деплоя в Rollbar. См. документацию https://docs.rollbar.com/docs/deploy-tracking (https://docs.rollbar.com/docs/source-control).
+
 
 Создайте файл базы данных с помощью Postgres и отмигрируйте:
 
@@ -191,6 +199,20 @@ Parcel будет следить за файлами в каталоге `bundle
 ```sh
 ./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
 ```
+
+## Быстрое обновление кода на сервере (prod-версии сайта)
+Используйте Bash скрипт деплоя:
+
+```sh
+./deploy
+```
+Если у файла нет прав на исполнение выполните команду:
+
+```sh
+chmod +x deploy
+```
+
+Пример сайта можно посмотреть: https://starburger.site
 
 ## Цели проекта
 
