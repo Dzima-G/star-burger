@@ -80,6 +80,8 @@ pip install -r requirements.txt
 - `ROLLBAR_ACCESS_TOKEN` - токен Rollbar (логирование организовано с помощью Rollbar) см. https://rollbar.com
 - `DJANGO_ENV` - настройка профиля Rollbar, не обязательная переменная (профиль по умолчанию 'development'). Для указания профиля добавьте переменную окружения например: `DJANGO_ENV=production`.
 - `YANDEX_API_KEY` - ключ Yandex geocoder, API. Пример: `YANDEX_API_KEY=d1000000f-3ce6-4344-bfe0-00vv21698888` (см. https://developer.tech.yandex.ru/services)
+- `ROLLBAR_DEPLOY_TOKEN` - токен для записи деплоя в Rollbar. См. документацию https://docs.rollbar.com/docs/deploy-tracking (https://docs.rollbar.com/docs/source-control)
+
 
 Создайте файл базы данных с помощью Postgres и отмигрируйте:
 
@@ -198,6 +200,13 @@ Parcel будет следить за файлами в каталоге `bundle
 ```sh
 ./deploy
 ```
+Если у файла нет прав на исполнение выполните команду:
+
+```sh
+chmod +x deploy
+```
+
+Пример сайта можно посмотреть: https://starburger.site
 
 ## Цели проекта
 
