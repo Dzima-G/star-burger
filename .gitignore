@@ -144,3 +144,4 @@ cython_debug/
 .parcel-cache/
 /export_data.py
 /data.json
+static/
