@@ -23,7 +23,7 @@ echo "Устанавливаем библиотеки для Node.js"
 npm install --silent
 
 echo "Пересоберем js код."
-./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
+./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./" --no-cache
 
 echo "Собираем статику."
 python3 manage.py collectstatic --noinput
