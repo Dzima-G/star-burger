@@ -1,4 +1,5 @@
 import os
+import dj_database_url
 
 from environs import Env
 
@@ -12,14 +13,10 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG', False)
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', ['127.0.0.1', 'localhost'])
 
-DB_NAME = env('DB_NAME')
-DB_USER = env('DB_USER')
-DB_PASSWORD = env('DB_PASSWORD')
-DB_HOST = env('DB_HOST', 'localhost')
-DB_PORT = env('DB_PORT', '5432')
+DB_URL = env('DB_URL')
 
 DJANGO_ENV = env('DJANGO_ENV', 'development')
-ROLLBAR_ACCESS_TOKEN = env('ROLLBAR_ACCESS_TOKEN')
+ROLLBAR_ACCESS_TOKEN = env('ROLLBAR_ACCESS_TOKEN', default='')
 
 YANDEX_GEOCODE_API_KEY = env('YANDEX_GEOCODE_API_KEY')
 
@@ -91,14 +88,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': DB_NAME,
-        'USER': DB_USER,
-        'PASSWORD': DB_PASSWORD,
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
+    'default': dj_database_url.parse(
+        DB_URL,
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
 
 AUTH_PASSWORD_VALIDATORS = [
