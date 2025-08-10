@@ -145,3 +145,4 @@ cython_debug/
 /export_data.py
 /data.json
 static/
+/db/

@@ -1,13 +1,13 @@
 import os
 import dj_database_url
 
+from pathlib import Path
 from environs import Env
 
 env = Env()
 env.read_env()
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG', False)
@@ -68,7 +68,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, "templates"),
+           os.path.join(BASE_DIR, 'backend', 'templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -86,6 +86,15 @@ WSGI_APPLICATION = 'star_burger.wsgi.application'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'frontend', 'assets'),
+    os.path.join(BASE_DIR, 'frontend', 'bundles'),
+]
 
 DATABASES = {
     'default': dj_database_url.parse(
@@ -120,15 +129,8 @@ USE_L10N = True
 
 USE_TZ = True
 
-STATIC_URL = '/static/'
-
 INTERNAL_IPS = [
     '127.0.0.1'
-]
-
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "assets"),
-    os.path.join(BASE_DIR, "bundles"),
 ]
 
 ROLLBAR = {
