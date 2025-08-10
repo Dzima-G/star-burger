@@ -1,0 +1,63 @@
+name: star-burger
+services:
+  frontend:
+    image: starburger/frontend:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: dev
+    volumes:
+      - ./frontend/bundles-src:/app/frontend/bundles-src
+      - ./frontend/bundles:/app/frontend/bundles
+    command: npx parcel watch bundles-src/index.js --dist-dir /app/frontend/bundles --public-url ./
+
+  db:
+    image: postgres:16
+    env_file:
+      - backend/.env
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} -h localhost -p 5432"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  backend-migrate:
+    image: starburger/migrate:latest
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: migrate
+    env_file:
+      - ./backend/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  web:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: web-dev
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app/backend:rw
+      - ./frontend:/app/frontend:rw
+      - ./media:/app/media:rw
+    ports:
+      - "127.0.0.1:8000:8000"
+    command: python manage.py runserver 0.0.0.0:8000
+    depends_on:
+      - db
+      - frontend
+      - backend-migrate
+
+volumes:
+  db:
+

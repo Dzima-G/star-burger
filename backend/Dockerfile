@@ -1,7 +1,6 @@
 # СОБОР ЗАВИСИМОСТЕЙ
-
-# выбираем используемый базовый образ
-FROM python:3.7-slim AS builder
+# выбираем базовый образ
+FROM python:3.10-slim AS py-deps
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -15,32 +14,71 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rm -rf /var/lib/apt/lists/*
 
 # копируем файл зависимостей
-COPY backend/requirements.txt ./requirements.txt
+COPY requirements.txt ./requirements.txt
 
 # устанавливаем зависимости
 RUN pip install --no-cache-dir -r requirements.txt
 
-# СБОР ФИНАЛЬНОГО ОБРАЗА
 
+# СБОР ФИНАЛЬНОГО ОБРАЗА STATIC
 # выбираем используемый базовый образ
-FROM python:3.7-slim
-
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-#ENV GUNICORN_CMD_ARGS="--bind 0.0.0.0:8000"
+FROM python:3.10-slim AS static
 
 # создаём рабочую директорию
 WORKDIR /app/backend
 
 # копируем зависимости
-COPY --from=builder /usr/local /usr/local
+COPY --from=py-deps /usr/local /usr/local
 
-# копируем файлы backend
-COPY backend /app/backend
+# копируем backend
+COPY . .
 
-# копируем папку frontend
-COPY frontend /app/frontend
-#
-#EXPOSE 8000
-#
-#CMD [ "gunicorn", "star_burger.wsgi:application", "--bind 0.0.0.0:8000"]
+
+# СБОР ФИНАЛЬНОГО ОБРАЗА MIGRATE
+# выбираем используемый базовый образ
+FROM python:3.10-slim AS migrate
+
+# создаём рабочую директорию
+WORKDIR /app/backend
+
+# копируем зависимости
+COPY --from=py-deps /usr/local /usr/local
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# копируем backend
+COPY . .
+
+CMD ["python", "manage.py", "migrate", "--noinput"]
+
+
+# СБОР ФИНАЛЬНОГО ОБРАЗА WEB_PROD
+# выбираем используемый базовый образ
+FROM python:3.10-slim AS web-prod
+
+# создаём рабочую директорию
+WORKDIR /app/backend
+
+# копируем зависимости
+COPY --from=py-deps /usr/local /usr/local
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# копируем backend
+COPY . .
+
+
+# СБОР ФИНАЛЬНОГО ОБРАЗА WEB_DEV
+# выбираем используемый базовый образ
+FROM python:3.10-slim AS web-dev
+
+# создаём рабочую директорию
+WORKDIR /app/backend
+
+# копируем зависимости
+COPY --from=py-deps /usr/local /usr/local
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1

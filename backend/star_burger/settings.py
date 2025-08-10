@@ -13,12 +13,13 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG', False)
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', ['127.0.0.1', 'localhost'])
 
-DB_URL = env('DB_URL')
-
 DJANGO_ENV = env('DJANGO_ENV', 'development')
 ROLLBAR_ACCESS_TOKEN = env('ROLLBAR_ACCESS_TOKEN', default='')
 
 YANDEX_GEOCODE_API_KEY = env('YANDEX_GEOCODE_API_KEY')
+
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 INSTALLED_APPS = [
     'foodcartapp.apps.FoodcartappConfig',
@@ -97,11 +98,16 @@ STATICFILES_DIRS = [
 ]
 
 DATABASES = {
-    'default': dj_database_url.parse(
-        DB_URL,
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
+        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+        'CONN_MAX_AGE': 600,
+        'CONN_HEALTH_CHECKS': True,
+    }
 }
 
 AUTH_PASSWORD_VALIDATORS = [
