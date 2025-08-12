@@ -1,7 +1,7 @@
 # СОБОР ЗАВИСИМОСТЕЙ
 
-# выбираем используемый базовый образ
-FROM python:3.7-slim AS builder
+# выбираем базовый образ
+FROM python:3.10-slim AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -20,14 +20,21 @@ COPY backend/requirements.txt ./requirements.txt
 # устанавливаем зависимости
 RUN pip install --no-cache-dir -r requirements.txt
 
+# копируем backend
+COPY backend /app/backend
+
+# копируем frontend
+COPY frontend /app/frontend
+
+RUN python manage.py collectstatic --noinput
+
 # СБОР ФИНАЛЬНОГО ОБРАЗА
 
 # выбираем используемый базовый образ
-FROM python:3.7-slim
+FROM python:3.10-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-#ENV GUNICORN_CMD_ARGS="--bind 0.0.0.0:8000"
 
 # создаём рабочую директорию
 WORKDIR /app/backend
@@ -35,12 +42,9 @@ WORKDIR /app/backend
 # копируем зависимости
 COPY --from=builder /usr/local /usr/local
 
-# копируем файлы backend
+# копируем backend и frontend
 COPY backend /app/backend
-
-# копируем папку frontend
 COPY frontend /app/frontend
-#
-#EXPOSE 8000
-#
-#CMD [ "gunicorn", "star_burger.wsgi:application", "--bind 0.0.0.0:8000"]
+
+# копируем static
+COPY --from=builder /app/static /app/static

@@ -200,8 +200,10 @@ Parcel будет следить за файлами в каталоге `bundle
 ./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
 ```
 
-## Быстрое обновление кода на сервере (prod-версии сайта)
-Используйте Bash скрипт деплоя:
+## Быстрое развертывание на сервере (prod-версии сайта)
+Скопируйте файл `stage/deploy` и `.env` в папку на сервере (например `opt`).
+
+Запустите Bash скрипт деплоя:
 
 ```sh
 ./deploy
@@ -211,6 +213,12 @@ Parcel будет следить за файлами в каталоге `bundle
 ```sh
 chmod +x deploy
 ```
+Настройте Nginx указав пути к stsic и media (с учетом расположения проекта `opt/star-burger/`):
+
+`/star-burger/static/`
+
+`/star-burger/media/`
+
 
 Пример сайта можно посмотреть: https://starburger.site
 

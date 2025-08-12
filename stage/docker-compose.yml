@@ -20,14 +20,9 @@ services:
     build:
       context: ..
       dockerfile: backend/Dockerfile
-    env_file:
-      - .env
     volumes:
       - ../static:/static
-    command: >
-      bash -lc "python manage.py collectstatic --noinput && cp -r /app/static/* /static/"
-    depends_on:
-      - db
+    command: sh -lc "cp -r /app/static/* /static/"
 
   backend-migrate:
     build:
@@ -36,9 +31,9 @@ services:
     env_file:
       - .env
     command: >
-      bash -lc "python manage.py migrate --noinput"
+          bash -lc "python manage.py migrate --noinput"
     depends_on:
-    - db
+      - db
 
   web:
     build:
@@ -51,7 +46,7 @@ services:
       - ../media:/app/media:rw
       - ../static:/app/static:ro
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     command: >
       gunicorn star_burger.wsgi:application
       --bind 0.0.0.0:8000
