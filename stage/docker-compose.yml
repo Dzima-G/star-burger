@@ -3,9 +3,11 @@ services:
     build:
       context: ../frontend
       dockerfile: Dockerfile
+      target: prod
     volumes:
       - ../static:/static
     command: sh -lc "cp -r /app/static/bundles/* /static/"
+    restart: "no"
 
   db:
     image: postgres:16
@@ -15,14 +17,22 @@ services:
       - ../db:/var/lib/postgresql/data
     ports:
       - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
   backend-collectstatic:
     build:
       context: ..
       dockerfile: backend/Dockerfile
+      target: static
     volumes:
       - ../static:/static
     command: sh -lc "cp -r /app/static/* /static/"
+    restart: "no"
 
   backend-migrate:
     build:
@@ -30,15 +40,16 @@ services:
       dockerfile: backend/Dockerfile
     env_file:
       - .env
-    command: >
-          bash -lc "python manage.py migrate --noinput"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    restart: "no"
 
   web:
     build:
       context: ..
       dockerfile: backend/Dockerfile
+      target: web_prod
     restart: unless-stopped
     env_file:
       - .env
