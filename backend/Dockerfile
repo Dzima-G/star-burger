@@ -33,6 +33,11 @@ COPY --from=py-deps /usr/local /usr/local
 COPY backend /app/backend
 COPY frontend /app/frontend
 
+# заглушки для django
+ENV SECRET_KEY=build-only \
+    DB_URL=sqlite:////tmp/db.sqlite3 \
+    YANDEX_GEOCODE_API_KEY=build-only
+
 # собираем статику
 RUN python manage.py collectstatic --noinput
 
