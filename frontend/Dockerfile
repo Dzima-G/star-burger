@@ -1,6 +1,6 @@
 # СОБОР FRONTEND
 # выбираем используемый базовый образ
-FROM node:17.6.0-slim AS builder
+FROM node:17.6.0-slim AS node-deps
 
 # создаём рабочую директорию
 WORKDIR /app/frontend
@@ -12,7 +12,7 @@ COPY package*.json ./
 RUN npm ci
 
 # сборка бандлов
-FROM builder AS prod-build
+FROM node-deps AS prod-build
 
 # создаём рабочую директорию
 WORKDIR /app/frontend
@@ -35,7 +35,7 @@ COPY --from=prod-build /app/frontend/bundles ./bundles
 
 # СБОР ФИНАЛЬНОГО ОБРАЗА DEV
 # выбираем используемый базовый образ
-FROM builder AS dev
+FROM node-deps AS dev
 
 # создаём рабочую директорию
 WORKDIR /app/frontend

@@ -1,6 +1,6 @@
 # СОБОР ЗАВИСИМОСТЕЙ
 # выбираем базовый образ
-FROM python:3.10-slim AS builder
+FROM python:3.10-slim AS py-deps
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -21,13 +21,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # СОБОР STARIC
 # выбираем базовый образ
-FROM builder AS get_static
+FROM py-deps AS get-static
 
 # создаём рабочую директорию
 WORKDIR /app/backend
 
 # копируем зависимости
-COPY --from=builder /usr/local /usr/local
+COPY --from=py-deps /usr/local /usr/local
 
 # копируем backend и frontend
 COPY backend /app/backend
@@ -44,7 +44,7 @@ FROM alpine:3.18 AS static
 WORKDIR /app/static
 
 # копируем static
-COPY --from=get_static /app/static /app/static
+COPY --from=get-static /app/static /app/static
 
 # СБОР ФИНАЛЬНОГО ОБРАЗА MIGRATE
 # выбираем используемый базовый образ
@@ -54,7 +54,7 @@ FROM python:3.10-slim AS migrate
 WORKDIR /app/backend
 
 # копируем зависимости
-COPY --from=builder /usr/local /usr/local
+COPY --from=py-deps /usr/local /usr/local
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -67,13 +67,13 @@ CMD ["python", "manage.py", "migrate", "--noinput"]
 
 # СБОР ФИНАЛЬНОГО ОБРАЗА WEB_PROD
 # выбираем используемый базовый образ
-FROM python:3.10-slim AS web_prod
+FROM python:3.10-slim AS web-prod
 
 # создаём рабочую директорию
 WORKDIR /app/backend
 
 # копируем зависимости
-COPY --from=builder /usr/local /usr/local
+COPY --from=py-deps /usr/local /usr/local
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -84,13 +84,13 @@ COPY frontend /app/frontend
 
 # СБОР ФИНАЛЬНОГО ОБРАЗА WEB_DEV
 # выбираем используемый базовый образ
-FROM python:3.10-slim AS web_dev
+FROM python:3.10-slim AS web-dev
 
 # создаём рабочую директорию
 WORKDIR /app/backend
 
 # копируем зависимости
-COPY --from=builder /usr/local /usr/local
+COPY --from=py-deps /usr/local /usr/local
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1

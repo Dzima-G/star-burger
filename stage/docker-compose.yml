@@ -52,7 +52,7 @@ services:
     build:
       context: ..
       dockerfile: backend/Dockerfile
-      target: web_prod
+      target: web-prod
     restart: unless-stopped
     env_file:
       - .env
