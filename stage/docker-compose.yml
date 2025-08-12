@@ -29,6 +29,8 @@ services:
       context: ..
       dockerfile: backend/Dockerfile
       target: static
+    env_file:
+      - .env
     volumes:
       - ../static:/static
     command: sh -lc "cp -r /app/static/* /static/"
@@ -38,6 +40,7 @@ services:
     build:
       context: ..
       dockerfile: backend/Dockerfile
+      target: migrate
     env_file:
       - .env
     depends_on:
