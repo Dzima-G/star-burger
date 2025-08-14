@@ -18,6 +18,9 @@ ROLLBAR_ACCESS_TOKEN = env('ROLLBAR_ACCESS_TOKEN', default='')
 
 YANDEX_GEOCODE_API_KEY = env('YANDEX_GEOCODE_API_KEY')
 
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 INSTALLED_APPS = [
     'foodcartapp.apps.FoodcartappConfig',
     'restaurateur.apps.RestaurateurConfig',
